@@ -64,16 +64,22 @@
             resultElement.textContent = '';
         }
 
-        function startGame() {
-            gameStarted = true;
-            score = 0;
-            timeLeft = 60;
-            updateScore();
-            startGameButton.style.display = 'none';
-            initializeSpeechRecognition();
-            recognition.start();  // Start speech recognition here immediately
-            loadNextMovie();
-            startTimer();
+        async function startGame() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                gameStarted = true;
+                score = 0;
+                timeLeft = 60;
+                updateScore();
+                startGameButton.style.display = 'none';
+                initializeSpeechRecognition();
+                loadNextMovie();
+                startTimer();
+                recognition.start();
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                alert('Microphone access is required to play the game. Please allow microphone access and try again.');
+            }
         }
 
         function startTimer() {
@@ -96,18 +102,18 @@
             startGameButton.style.display = 'inline';
             startGameButton.textContent = 'Play Again';
             gameStarted = false;
-            recognition.stop();  // Stop speech recognition only at the end
+            recognition.stop();
         }
 
         function initializeSpeechRecognition() {
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'en-US';
-            recognition.continuous = true;  // Continuous listening mode
+            recognition.continuous = true;
             recognition.interimResults = false;
 
             recognition.onresult = (event) => {
-                const guess = event.results[event.resultIndex][0].transcript.toLowerCase();
-                console.log("Captured Speech: ", guess);  // Logging captured speech
+                const guess = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                console.log("Captured Speech: ", guess);
                 if (guess === currentMovie.name.toLowerCase()) {
                     score++;
                     updateScore();
@@ -125,7 +131,7 @@
 
             recognition.onend = () => {
                 if (gameStarted) {
-                    recognition.start();  // Restart listening if the game is still running
+                    recognition.start();
                 }
             };
         }
@@ -134,4 +140,3 @@
     </script>
 </body>
 </html>
-
