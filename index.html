@@ -25,14 +25,19 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+        #timer, #score {
+            font-size: 24px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <h1>Guess the Movie</h1>
+    <div id="timer">Time: 60</div>
+    <div id="score">Score: 0</div>
     <img id="movieImage" src="/api/placeholder/300/300" alt="Movie Image">
     <p id="result"></p>
-    <button id="startListening">Start Guessing</button>
-    <button id="nextQuestion">Next Question</button>
+    <button id="startGame">Start Game</button>
 
     <script>
         const movies = [
@@ -40,43 +45,99 @@
             { name: "Pulp Fiction", image: "./i2.jpeg" },
             { name: "The Dark Knight", image: "./i3.jpeg" }
         ];
-
         let currentMovie;
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let gameStarted = false;
+        let recognition;
+
         const movieImage = document.getElementById('movieImage');
         const resultElement = document.getElementById('result');
-        const startListeningButton = document.getElementById('startListening');
-        const nextQuestionButton = document.getElementById('nextQuestion');
+        const startGameButton = document.getElementById('startGame');
+        const timerElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
 
         function loadNextMovie() {
             currentMovie = movies[Math.floor(Math.random() * movies.length)];
             movieImage.src = currentMovie.image;
             resultElement.textContent = '';
+            startListening();
         }
 
-        function startListening() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        function startGame() {
+            gameStarted = true;
+            score = 0;
+            timeLeft = 60;
+            updateScore();
+            startGameButton.style.display = 'none';
+            initializeSpeechRecognition();
+            loadNextMovie();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Time: ${timeLeft}`;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function updateScore() {
+            scoreElement.textContent = `Score: ${score}`;
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            resultElement.textContent = `Game Over! Your final score is ${score}.`;
+            startGameButton.style.display = 'inline';
+            startGameButton.textContent = 'Play Again';
+            gameStarted = false;
+            recognition.stop();
+        }
+
+        function initializeSpeechRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'en-US';
-            recognition.start();
+            recognition.continuous = false;
+            recognition.interimResults = false;
 
             recognition.onresult = (event) => {
                 const guess = event.results[0][0].transcript.toLowerCase();
                 if (guess === currentMovie.name.toLowerCase()) {
+                    score++;
+                    updateScore();
                     resultElement.textContent = 'Correct!';
+                    setTimeout(loadNextMovie, 1000);
                 } else {
-                    resultElement.textContent = `Sorry, the correct answer was "${currentMovie.name}".`;
+                    resultElement.textContent = 'Incorrect. Try again!';
+                    startListening();
                 }
             };
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error', event.error);
                 resultElement.textContent = 'Error in speech recognition. Please try again.';
+                startListening();
+            };
+
+            recognition.onend = () => {
+                if (gameStarted) {
+                    startListening();
+                }
             };
         }
 
-        startListeningButton.addEventListener('click', startListening);
-        nextQuestionButton.addEventListener('click', loadNextMovie);
+        function startListening() {
+            if (gameStarted) {
+                recognition.start();
+            }
+        }
 
-        loadNextMovie();
+        startGameButton.addEventListener('click', startGame);
     </script>
 </body>
 </html>
