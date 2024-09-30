@@ -25,9 +25,13 @@
             padding: 10px 20px;
             font-size: 16px;
         }
-        #timer, #score {
+        #timer, #score, #userGuess {
             font-size: 24px;
             margin: 10px 0;
+        }
+        #userGuess {
+            font-style: italic;
+            color: #555;
         }
     </style>
 </head>
@@ -36,6 +40,7 @@
     <div id="timer">Time: 60</div>
     <div id="score">Score: 0</div>
     <img id="movieImage" src="/api/placeholder/300/300" alt="Movie Image">
+    <div id="userGuess">Your guess will appear here</div>
     <p id="result"></p>
     <button id="startGame">Start Game</button>
 
@@ -57,11 +62,13 @@
         const startGameButton = document.getElementById('startGame');
         const timerElement = document.getElementById('timer');
         const scoreElement = document.getElementById('score');
+        const userGuessElement = document.getElementById('userGuess');
 
         function loadNextMovie() {
             currentMovie = movies[Math.floor(Math.random() * movies.length)];
             movieImage.src = currentMovie.image;
             resultElement.textContent = '';
+            userGuessElement.textContent = 'Your guess will appear here';
         }
 
         async function startGame() {
@@ -114,6 +121,7 @@
             recognition.onresult = (event) => {
                 const guess = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
                 console.log("Captured Speech: ", guess);
+                userGuessElement.textContent = `Your guess: ${guess}`;
                 if (guess === currentMovie.name.toLowerCase()) {
                     score++;
                     updateScore();
