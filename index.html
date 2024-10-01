@@ -6,43 +6,99 @@
     <title>Telugu Movie Guessing Game</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
         }
-        #movieImage {
-            max-width: 300px;
-            max-height: 300px;
+
+        h1 {
+            font-size: 36px;
+            color: #343a40;
             margin-bottom: 20px;
         }
+
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #movieImage {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
         button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
         }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
         #timer, #score, #userGuess {
-            font-size: 24px;
+            font-size: 20px;
             margin: 10px 0;
+            color: #495057;
         }
+
+        #result {
+            font-size: 24px;
+            color: #28a745;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
         #userGuess {
             font-style: italic;
-            color: #555;
+            color: #6c757d;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 28px;
+            }
+            button {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+            #timer, #score, #userGuess {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Guess the Telugu Movie</h1>
-    <div id="timer">Time: 60</div>
-    <div id="score">Score: 0</div>
-    <img id="movieImage" src="./images/image.png" alt="Movie Image">
-    <div id="userGuess">Your guess will appear here</div>
-    <p id="result"></p>
-    <button id="startGame">Start Game</button>
+    <div id="gameContainer">
+        <div id="timer">Time: 60</div>
+        <div id="score">Score: 0</div>
+        <img id="movieImage" src="./images/image.png" alt="Movie Image">
+        <div id="userGuess">Your guess will appear here</div>
+        <p id="result"></p>
+        <button id="startGame">Start Game</button>
+    </div>
 
     <script>
         const originalMovies = [
@@ -55,7 +111,7 @@
             { name: "అహా నా పెళ్ళంట", image: "./images/image 7.png" },
             { name: "మహానటి", image: "./images/image 8.png" },
             { name: "ఆ నలుగురు", image: "./images/image 9.png" },
-            { name: "బాహుబలి ", image: "./images/image 10.png" },
+            { name: "బాహుబలి", image: "./images/image 10.png" },
             { name: "బొమ్మరిల్లు", image: "./images/image 11.png" },
             { name: "పెళ్లి చూపులు", image: "./images/image 12.png" },
             { name: "హాయ్ నాన్న", image: "./images/image 13.png" },
@@ -243,3 +299,4 @@
     </script>
 </body>
 </html>
+
