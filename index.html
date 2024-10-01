@@ -114,23 +114,19 @@
             userGuessElement.textContent = 'Your guess will appear here';
         }
 
-        async function startGame() {
-            try {
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-                gameStarted = true;
-                score = 0;
-                timeLeft = 60;
-                updateScore();
-                startGameButton.style.display = 'none';
+        function startGame() {
+            if (!recognition) {
                 initializeSpeechRecognition();
-                resetMovies();
-                loadNextMovie();
-                startTimer();
-                recognition.start();
-            } catch (err) {
-                console.error('Error accessing microphone:', err);
-                alert('Microphone access is required to play the game. Please allow microphone access and try again.');
             }
+            gameStarted = true;
+            score = 0;
+            timeLeft = 60;
+            updateScore();
+            startGameButton.style.display = 'none';
+            resetMovies();
+            loadNextMovie();
+            startTimer();
+            recognition.start();
         }
 
         function startTimer() {
@@ -158,23 +154,26 @@
 
         function initializeSpeechRecognition() {
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'te-IN';  // Set language to Telugu
+            recognition.lang = 'te-IN';
             recognition.continuous = true;
-            recognition.interimResults = false;
+            recognition.interimResults = true;
 
             recognition.onresult = (event) => {
-                const guess = event.results[event.results.length - 1][0].transcript.trim();
-                console.log("Captured Speech (Telugu): ", guess);
-                userGuessElement.textContent = `Your guess: ${guess}`;
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                userGuessElement.textContent = `Your guess: ${finalTranscript || interimTranscript}`;
                 
-                const similarity = stringSimilarity(guess.toLowerCase(), currentMovie.name.toLowerCase());
-                if (similarity >= 0.6) {
-                    score++;
-                    updateScore();
-                    resultElement.textContent = 'Correct!';
-                    setTimeout(loadNextMovie, 1000);
-                } else {
-                    resultElement.textContent = 'Incorrect. Try again!';
+                if (finalTranscript) {
+                    checkGuess(finalTranscript);
                 }
             };
 
@@ -188,6 +187,19 @@
                     recognition.start();
                 }
             };
+        }
+
+        function checkGuess(guess) {
+            console.log("Checking guess:", guess);
+            const similarity = stringSimilarity(guess.toLowerCase(), currentMovie.name.toLowerCase());
+            if (similarity >= 0.6) {
+                score++;
+                updateScore();
+                resultElement.textContent = 'Correct!';
+                setTimeout(loadNextMovie, 1000);
+            } else {
+                resultElement.textContent = 'Incorrect. Try again!';
+            }
         }
 
         function stringSimilarity(s1, s2) {
